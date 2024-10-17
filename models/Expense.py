@@ -33,7 +33,7 @@ async def get_month_expenses(year,month):
     try:
         async with db.pool.acquire() as conn:
             async with conn.transaction():
-                return await conn.fetch("select  * from expenses where year(date)=$1 or month(date)=$2")
+                return await conn.fetch("select  * from expenses where extract (year from date)=$1 or extract (month from date)=$2")
                 
                 
 
@@ -46,7 +46,7 @@ async def get_totals():
     try:
         async with db.pool.acquire() as conn:
             async with conn.transaction():
-                return await conn.fetch("select (select sum(amount) from expenses where category=(select expense_id from expenses_cat where category='salary)),(select sum(amount) from expenses where category=(select expense_id from expenses_cat where category!='salary)")
+                return await conn.fetch("select (select sum(amount) as total_salary from expenses where exp_id in(select expense_id from expenses_cat where category='salary')),(select sum(amount)as total_expenses from expenses where exp_id in(select expense_id from expenses_cat where category!='salary'))")
                 
                 
 
